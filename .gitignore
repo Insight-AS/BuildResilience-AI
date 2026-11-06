@@ -1,5 +1,28 @@
-﻿node_modules/
-dist/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 .env
-.env.local
-.env.*.local
+# model weights and generated data stay out of git
+models/*.pth
+models/*.pt
+models/*.ckpt
+data/uploads/*
+data/active/*
+data/tmp/*
+outputs/*
+!.gitkeep
+!models/README.md
+
+# Frontend dependencies
+node_modules/
+
+# Frontend build output
+dist/
+
+# IDE
+.vscode/
+
+# Logs
+*.log
