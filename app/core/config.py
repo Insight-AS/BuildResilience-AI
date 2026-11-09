@@ -134,7 +134,7 @@ def get_settings() -> Settings:
         batch_size=_int("INFERENCE_BATCH_SIZE", 4),
         threshold=_float("PREDICTION_THRESHOLD", 0.5),
         normalize=_get("NORMALIZE", "imagenet").lower(),
-        max_upload_size_mb=_int("MAX_UPLOAD_SIZE_MB", 100),
+        max_upload_size_mb=_int("MAX_UPLOAD_SIZE_MB", 300),
         max_image_pixels=_int("MAX_IMAGE_PIXELS", 25_000_000),
         max_geojson_features=_int("MAX_GEOJSON_FEATURES", 200_000),
         upload_ttl_hours=_int("UPLOAD_TTL_HOURS", 24),

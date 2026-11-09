@@ -135,12 +135,30 @@ def items_to_features(
 
 
 def summarize(items: list[BuildingItem]) -> dict:
-    areas = [it.area_m2 for it in items if it.area_m2 is not None]
-    out = {"building_count": len(items), "total_area_m2": None, "mean_area_m2": None,
-           "median_area_m2": None, "min_area_m2": None, "max_area_m2": None,
-           "total_area_px": int(sum(it.area_px for it in items))}
-    if areas:
-        out.update(total_area_m2=round(float(sum(areas)), 2), mean_area_m2=round(float(np.mean(areas)), 2),
-                   median_area_m2=round(float(np.median(areas)), 2), min_area_m2=round(float(min(areas)), 2),
-                   max_area_m2=round(float(max(areas)), 2))
+    areas_m2 = [it.area_m2 for it in items if it.area_m2 is not None]
+    areas_px = [it.area_px for it in items]
+
+    out = {
+        "building_count": len(items),
+        "total_area_m2": None,
+        "mean_area_m2": None,
+        "median_area_m2": None,
+        "min_area_m2": None,
+        "max_area_m2": None,
+        "total_area_px": int(sum(areas_px)),
+        "mean_area_px": round(float(np.mean(areas_px)), 2) if areas_px else None,
+        "median_area_px": round(float(np.median(areas_px)), 2) if areas_px else None,
+        "min_area_px": round(float(min(areas_px)), 2) if areas_px else None,
+        "max_area_px": round(float(max(areas_px)), 2) if areas_px else None,
+    }
+
+    if areas_m2:
+        out.update(
+            total_area_m2=round(float(sum(areas_m2)), 2),
+            mean_area_m2=round(float(np.mean(areas_m2)), 2),
+            median_area_m2=round(float(np.median(areas_m2)), 2),
+            min_area_m2=round(float(min(areas_m2)), 2),
+            max_area_m2=round(float(max(areas_m2)), 2),
+        )
+
     return out
