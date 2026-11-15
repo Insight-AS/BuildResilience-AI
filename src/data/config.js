@@ -5,8 +5,8 @@ export const PIPELINE = [
 ].map(([name, status]) => ({ name, status }))
 export const NAV = [
   ['/', 'Overview', 'LayoutDashboard'], ['/map', 'Map Explorer', 'Map'], ['/density', 'Density Analysis', 'Grid3x3'],
-  ['/performance', 'Model Performance', 'Gauge'], ['/analysis', 'AI Analysis', 'ScanSearch'],
-  ['/project', 'Project Information', 'BookOpen'], ['/settings', 'Settings', 'Settings'],
+  ['/analysis', 'AI Analysis', 'ScanSearch'],
+  ['/project', 'Project Information', 'BookOpen'],
 ]
 // SAMPLE ONLY: synthetic shapes for layout preview. Not project results.
 export const SAMPLE = {
