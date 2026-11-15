@@ -173,10 +173,10 @@ export function Performance() {
 
   return (
     <>
-      <PageHeader
+      {/* <PageHeader
         title="Model performance"
         subtitle="Edge-detection baseline versus CNN segmentation, evaluated on held-out data."
-      />
+      /> */}
 
       <div className="grid-5">
         {names.map((n) => (
