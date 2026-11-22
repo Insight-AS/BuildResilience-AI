@@ -20,12 +20,11 @@ import {
   ErrorState,
   LoadingState,
   StatusBadge,
-  ProjectPipeline,
 } from '../components/ui'
 import { useApi } from '../hooks/useApi'
 import { api } from '../services/api'
 import { useSample } from '../components/Layout'
-import { PIPELINE, SAMPLE } from '../data/config'
+import { SAMPLE } from '../data/config'
 import { tip } from './Overview'
 
 const axes = (
@@ -128,25 +127,7 @@ export function Density() {
         />
       </GlassPanel>
 
-      <GlassPanel>
-        <h3>Planned vs informal settlements</h3>
-        <p className="sub">
-          Compares density, footprint distribution, count error, IoU and Dice.
-        </p>
-
-        <EmptyState
-          title="Awaiting settlement classification data"
-          hint="Settlement labels are not available yet. This section activates when the backend provides them."
-        />
-      </GlassPanel>
-
-      <GlassPanel>
-        <h3>Choropleth</h3>
-        <p className="sub">
-          Ward density shading is ready on the Map Explorer's “Building density”
-          layer once ward and density GeoJSON are served.
-        </p>
-      </GlassPanel>
+      
     </>
   )
 }
@@ -478,8 +459,88 @@ export function Analysis() {
 
               <button
                 className="btn"
-                disabled
-                title="Export wiring depends on the response shape"
+                onClick={() => {
+                  if (!res?.data) return;
+
+                  const format = opt.format;
+                  let content;
+                  let mimeType;
+                  let extension;
+
+                  if (format === "geojson") {
+                    const geojson = res.data.geojson;
+
+                    if (!geojson || !Array.isArray(geojson.features)) {
+                      alert("GeoJSON data is not available.");
+                      return;
+                    }
+
+                    content = JSON.stringify(geojson, null, 2);
+                    mimeType = "application/geo+json";
+                    extension = "geojson";
+
+                  } else if (format === "png") {
+                    const maskUri = res.data.mask?.data_uri;
+
+                    if (!maskUri) {
+                      alert("Segmentation mask is not available.");
+                      return;
+                    }
+
+                    const link = document.createElement("a");
+                    link.href = maskUri;
+                    link.download = `buildresilience-mask-${res.data.analysis_id}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    return;
+
+                  } else if (format === "csv") {
+                    const stats = res.data.statistics || {};
+
+                    const rows = [
+                      ["Metric", "Value"],
+                      ["Building Count", stats.building_count],
+                      ["Total Area (m2)", stats.total_area_m2],
+                      ["Mean Area (m2)", stats.mean_area_m2],
+                      ["Median Area (m2)", stats.median_area_m2],
+                      ["Minimum Area (m2)", stats.min_area_m2],
+                      ["Maximum Area (m2)", stats.max_area_m2],
+                      ["Building Density (per km2)", stats.building_density_per_km2],
+                      ["Building Coverage (%)", stats.building_coverage_pct],
+                    ];
+
+                    content = rows
+                      .map(row =>
+                        row.map(value =>
+                          `"${String(value ?? "").replace(/"/g, '""')}"`
+                        ).join(",")
+                      )
+                      .join("\n");
+
+                    mimeType = "text/csv;charset=utf-8;";
+                    extension = "csv";
+
+                  } else {
+                    alert("Unsupported export format.");
+                    return;
+                  }
+
+                  const blob = new Blob([content], { type: mimeType });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+
+                  link.href = url;
+                  link.download = `buildresilience-analysis-${res.data.analysis_id || Date.now()}.${extension}`;
+
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+
+                  setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }}
+                disabled={!res?.data}
+                title={`Download analysis as ${opt.format.toUpperCase()}`}
               >
                 <Download size={14} />
                 Export
@@ -693,10 +754,6 @@ export function Project() {
           </p>
         </T>
 
-        <GlassPanel>
-          <h3>Pipeline</h3>
-          <ProjectPipeline stages={PIPELINE} />
-        </GlassPanel>
       </div>
     </>
   )
