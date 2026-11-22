@@ -87,7 +87,7 @@ class ModelManager:
                     want = "cpu"
                 device = torch.device("cuda" if (want == "auto" and torch.cuda.is_available()) or want == "cuda" else "cpu")
                 model = smp.create_model(s.architecture, encoder_name=s.encoder_name, encoder_weights=None, in_channels=3, classes=1)
-                ckpt = torch.load(s.model_path, map_location="cpu", weights_only=True)
+                ckpt = torch.load(s.model_path, map_location="cpu", weights_only=False)
                 state = ckpt
                 if isinstance(ckpt, dict):
                     for k in _STATE_KEYS:

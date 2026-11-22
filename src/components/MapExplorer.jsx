@@ -8,10 +8,23 @@ import { MAP_CENTER } from '../data/config'
 import { useSample } from './Layout'
 import { SampleBadge, StatusBadge } from './ui'
 
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY
+
 const BASEMAPS = {
-  Aerial: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles © Esri, Maxar, Earthstar Geographics' },
-  Streets: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '© OpenStreetMap contributors' },
-  Dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '© OpenStreetMap, © CARTO' },
+  Aerial: {
+    url: `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`,
+    attr: '&copy; MapTiler &copy; OpenStreetMap contributors',
+  },
+
+  Streets: {
+    url: `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    attr: '&copy; MapTiler &copy; OpenStreetMap contributors',
+  },
+
+  Dark: {
+    url: `https://api.maptiler.com/maps/dataviz-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    attr: '&copy; MapTiler &copy; OpenStreetMap contributors',
+  },
 }
 const LAYERS = [
   { id: 'truth', label: 'Ground truth footprints', color: '#C8FD03' },
@@ -65,7 +78,13 @@ export default function MapExplorer() {
   const fullscreen = () => (document.fullscreenElement ? document.exitFullscreen() : wrap.current?.requestFullscreen())
   return <div className="map-wrap" ref={wrap}>
     <MapContainer center={MAP_CENTER} zoom={17} zoomControl={false} className="map">
-      <TileLayer key={base} url={BASEMAPS[base].url} attribution={BASEMAPS[base].attr} maxZoom={19} />
+      <TileLayer
+  key={base}
+  url={BASEMAPS[base].url}
+  attribution={BASEMAPS[base].attr}
+  maxZoom={19}
+  maxNativeZoom={base === 'Dark' ? 16 : 19}
+/>
       <ZoomControl position="bottomright" /><ScaleControl position="bottomleft" />
       {vis.wards && src.wards && <GeoJSON key={'w' + !!demo} data={src.wards} style={{ color: '#EDB158', weight: 2, dashArray: '6 4', fillOpacity: 0.04 }} />}
       {vis.truth && src.truth && <GeoJSON key={'t' + !!demo} data={src.truth} style={() => style('#C8FD03', 0.25)} onEachFeature={onEach('#C8FD03')} />}
@@ -85,10 +104,21 @@ export default function MapExplorer() {
     {panel && <aside className="map-panel glass">
       <h3><ListTree size={15} /> Layers</h3>
       <div className="seg">{Object.keys(BASEMAPS).map((b) => <button key={b} className={b === base ? 'on' : ''} onClick={() => setBase(b)}>{b}</button>)}</div>
-      <ul>{LAYERS.map((l) => { const has = !!src[l.id], pending = ['density', 'risk'].includes(l.id)
-        return <li key={l.id}><button onClick={() => setVis({ ...vis, [l.id]: !vis[l.id] })} className={vis[l.id] ? 'on' : ''} aria-pressed={vis[l.id]}>
-          {vis[l.id] ? <Eye size={15} /> : <EyeOff size={15} />}<i style={{ background: l.color }} /><span>{l.label}</span>
-          {(pending || !has) && <em>{pending ? 'awaiting data' : 'no data'}</em>}</button></li> })}</ul>
+      <ul>
+  {LAYERS.map((l) => (
+    <li key={l.id}>
+      <button
+        onClick={() => setVis({ ...vis, [l.id]: !vis[l.id] })}
+        className={vis[l.id] ? 'on' : ''}
+        aria-pressed={vis[l.id]}
+      >
+        {vis[l.id] ? <Eye size={15} /> : <EyeOff size={15} />}
+        <i style={{ background: l.color }} />
+        <span>{l.label}</span>
+      </button>
+    </li>
+  ))}
+</ul>
       <div className="legend"><b>Legend</b>{LAYERS.slice(0, 3).map((l) => <span key={l.id}><i style={{ background: l.color }} />{l.label}</span>)}</div>
       <div className="map-status"><StatusBadge tone={fp.error ? 'orange' : 'cyan'}>{status}</StatusBadge>{usingSample && <SampleBadge />}
         {measure && <span className="measure">Measured: {dist ? `${dist.toFixed(1)} m` : 'click points on the map'}</span>}</div>
