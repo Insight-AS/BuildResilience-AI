@@ -35,7 +35,6 @@ export default function Overview() {
       </ChartPanel>
     </div>
     <div className="grid-3">
-      <GlassPanel><h3>Project pipeline</h3><p className="sub">Edit stage status in <code>src/data/config.js</code>.</p><ProjectPipeline stages={PIPELINE} /></GlassPanel>
       <GlassPanel><h3>Model status</h3>{sum.data?.model ? <p>{sum.data.model}</p> : <EmptyState title="No trained model connected" hint="Model status appears once the backend reports it." />}</GlassPanel>
       <GlassPanel><h3>Recent analysis activity</h3><EmptyState title="No analyses yet" hint="Run one from AI Analysis." /></GlassPanel>
     </div>
